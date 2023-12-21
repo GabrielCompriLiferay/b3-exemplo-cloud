@@ -59,7 +59,7 @@ subprojects {
 
     if(!containsPackageJson){
 
-        apply plugin: 'java-platform'
+        apply plugin: 'java'
 
         dependencies {
             implementation (platform("br.com.b3:${project.property("b3.platform.name")}:${project.property("b3.platform.version")}"))
