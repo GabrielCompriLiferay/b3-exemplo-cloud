@@ -1,1 +1,122 @@
 
+println "[INFO] Using Platform BOM: ${project.findProperty("b3.platform.name")}:${project.findProperty("b3.platform.version")}"
+
+task showDependencies {
+
+    //Ex: gradlew showDependencies -PprojName=b3-mail-manager -PprojDependency=b3-panel-category
+
+    //Ex: gradlew showDependencies -PprojName=b3-mail-manager
+    def byProjName = project.findProperty('projName') ?: ""
+
+    //Ex: gradlew showDependencies -PprojDependency=b3-panel-category
+    def byProjDependency = project.findProperty('projDependency') ?: ""
+
+    println "byProjName:$byProjName | byDependency: $byProjDependency"
+
+    doLast {
+        subprojects.each { project ->
+
+            if(!project.name.contains(byProjName)){
+                return;
+            }
+
+            println ""
+            println "Subproject: ${project.name}"
+
+            project.configurations.each { configuration ->
+                configuration.getAllDependencies().each { dependency ->
+                
+                    if( !dependency.toString().contains("DefaultProjectDependency") || !dependency.toString().contains(byProjDependency)){
+                        return;
+                    }
+
+                    println "       Dependency: ${dependency.toString()}"
+
+                }
+            }
+        }
+    }
+}
+
+subprojects { 
+
+    def containsPackageJson = false
+
+    def files = fileTree(projectDir).matching{ exclude { details -> details.directory } }.files
+    files.each { file -> 
+        if(file.name.contains("package.json")) { 
+
+            def jsonData = new groovy.json.JsonSlurper().parseText(file.text)
+
+            if(jsonData.version != null){
+
+                project.ext.jsonName = jsonData.name
+                project.ext.jsonVersion = jsonData.version
+
+                containsPackageJson = true 
+            }
+        } 
+    }
+
+    if(!containsPackageJson){
+
+        apply plugin: 'java'
+
+        dependencies {
+            implementation (platform("br.com.b3:${project.property("b3.platform.name")}:${project.property("b3.platform.version")}"))
+        }
+
+        jar {
+            baseName = "${project.name}"
+            version = ""
+        }
+    }
+
+    apply plugin: "maven-publish"
+
+    repositories {
+        maven {
+            url = uri("https://maven.pkg.github.com/GabrielCompriLiferay/b3-exemplo-cloud")
+            credentials {
+
+                username = gradle.localProperties.getProperty("b3.github.user") ?: System.getenv("USER")
+
+                password = gradle.localProperties.getProperty("b3.github.token") ?: System.getenv("TOKEN")
+            }
+        }
+    }
+
+    publishing {
+        repositories {
+            maven {
+
+                def repo = "${System.getenv("WORKSPACE_OWNER_REPOSITORY")}/${System.getenv("WORKSPACE_REPOSITORY")}"
+                url = uri("https://maven.pkg.github.com/$repo")
+                name = "GitHubPackages"
+
+                credentials {
+                    username = System.getenv("USER")
+                    password = System.getenv("TOKEN")
+                }
+            }
+        }
+
+        publications {
+            gpr(MavenPublication) {
+
+                groupId = System.getenv("GROUP_ID")
+                version = System.getenv("MODULE_FULL_VERSION")
+        
+                if (project.name == "modules") {
+                    version = "1.0.0-SNAPSHOT"
+                }
+
+                if (containsPackageJson) {
+                    artifact(file("${projectDir}/dist/${project.jsonName}-${project.jsonVersion}.jar"))
+                }else{
+                    from(project.components.java)
+                }
+            }
+        }
+    }
+}
