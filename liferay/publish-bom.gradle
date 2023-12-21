@@ -1,5 +1,6 @@
 plugins {
     id 'maven-publish'
+    id 'java-platform'
 }
 
 dependencies {
@@ -26,7 +27,7 @@ publishing {
             artifactId = "${System.getenv("ARTIFACT_ID")}${System.getenv("SUFFIX")}"
             version = System.getenv("MODULE_VERSION")
             // You may need to adjust this part depending on your project structure
-            afterEvaluate { from(components["java"]) }
+            afterEvaluate { from(components["java-platform"]) }
         }
     }
 }
