@@ -25,13 +25,13 @@ if(file.exists()){
 	}
 }
 
-if(!System.getenv("WORKSPACE_OWNER_REPOSITORY") && ( !gradle.localProperties.getProperty("klabin.github.user") || !gradle.localProperties.getProperty("klabin.github.token") ) ){
+if(!System.getenv("WORKSPACE_OWNER_REPOSITORY") && ( !gradle.localProperties.getProperty("b3.github.user") || !gradle.localProperties.getProperty("b3.github.token") ) ){
 	println """
-[WARN] The klabin.github.token and klabin.github.user properties are not configured in the liferay/gradle-local.properties file.
+[WARN] The b3.github.token and b3.github.user properties are not configured in the liferay/gradle-local.properties file.
 [WARN] Please configure these properties as they are required for your project build.
 [WARN] Example:
 
-klabin.github.user=douglas.damiani@example.com.br
-klabin.github.token=myToken
+b3.github.user=douglas.damiani@example.com.br
+b3.github.token=myToken
 """
 }
