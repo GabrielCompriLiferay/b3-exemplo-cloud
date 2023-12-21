@@ -1,21 +1,17 @@
-apply plugin: 'java-platform'
-apply plugin: 'maven-publish'
+plugins {
+    id 'maven-publish'
+}
 
 dependencies {
     constraints {
-    
-        //#
-
+        // Your constraints go here
     }
 }
 
 publishing {
-
     repositories {
         maven {
-
             def repo = "${System.getenv("WORKSPACE_OWNER_REPOSITORY")}/${System.getenv("WORKSPACE_REPOSITORY")}"
-
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/$repo")
             credentials {
@@ -29,8 +25,8 @@ publishing {
             groupId = "br.com.b3"
             artifactId = "${System.getenv("ARTIFACT_ID")}${System.getenv("SUFFIX")}"
             version = System.getenv("MODULE_VERSION")
-            afterEvaluate { from(components["javaPlatform"]) }
+            // You may need to adjust this part depending on your project structure
+            afterEvaluate { from(components["java"]) }
         }
-        
     }
-}   
+}
