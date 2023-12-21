@@ -12,4 +12,26 @@ buildscript {
 	}
 }
 
+apply plugin: "net.saliman.properties"
 apply plugin: "com.liferay.workspace"
+
+
+def file = file("gradle-local.properties")
+gradle.ext.localProperties=new Properties()
+
+if(file.exists()){
+	file.withInputStream { stream ->
+		gradle.localProperties.load(stream)
+	}
+}
+
+if(!System.getenv("WORKSPACE_OWNER_REPOSITORY") && ( !gradle.localProperties.getProperty("klabin.github.user") || !gradle.localProperties.getProperty("klabin.github.token") ) ){
+	println """
+[WARN] The klabin.github.token and klabin.github.user properties are not configured in the liferay/gradle-local.properties file.
+[WARN] Please configure these properties as they are required for your project build.
+[WARN] Example:
+
+klabin.github.user=douglas.damiani@example.com.br
+klabin.github.token=myToken
+"""
+}
