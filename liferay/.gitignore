@@ -30,4 +30,6 @@ package.json
 yarn.lock
 
 modules/*
+!modules/.touch
 themes/*
+!themes/.touch
